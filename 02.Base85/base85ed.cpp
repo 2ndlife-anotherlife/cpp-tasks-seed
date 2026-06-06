@@ -103,6 +103,24 @@ std::vector<uint8_t> base85::decode(std::vector<uint8_t> const &b85str)
             throw std::runtime_error("base85 sequence overflow");
         }
 
+        if (chunk_size < 5)
+        {
+            uint32_t clean_acc = 0;
+            if (chunk_size >= 2) clean_acc |= ((acc >> 24) & 0xFF) << 24;
+            if (chunk_size >= 3) clean_acc |= ((acc >> 16) & 0xFF) << 16;
+            if (chunk_size >= 4) clean_acc |= ((acc >> 8)  & 0xFF) << 8;
+
+            uint32_t temp = clean_acc;
+            uint32_t divisors[] = { 52200625, 614125, 7225, 85, 1 };
+            for (size_t j = 0; j < chunk_size; ++j)
+            {
+                if (decode_map[b85str[i + j]] != static_cast<int>((temp / divisors[j]) % 85))
+                {
+                    throw std::runtime_error("invalid base85 sequence: corrupted padding bits");
+                }
+            }
+        }
+
         if (chunk_size >= 2) out.push_back(static_cast<uint8_t>((acc >> 24) & 0xFF));
         if (chunk_size >= 3) out.push_back(static_cast<uint8_t>((acc >> 16) & 0xFF));
         if (chunk_size >= 4) out.push_back(static_cast<uint8_t>((acc >> 8) & 0xFF));
