@@ -11,14 +11,14 @@ template <typename Iterator>
 void bubble_sort(Iterator begin, Iterator end)
 {
     if (begin == end) return;
-    
+
     bool swapped = true;
     while (swapped)
     {
         swapped = false;
         Iterator i = begin;
         Iterator next = std::next(begin);
-        
+
         while (next != end)
         {
             if (*next < *i)
